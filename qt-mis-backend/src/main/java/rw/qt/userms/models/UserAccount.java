@@ -54,6 +54,7 @@ public class UserAccount {
 
 
     @ManyToMany(mappedBy = "assignees" ,fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Task> tasks;
 
     @JsonIgnore

@@ -1,5 +1,6 @@
 package rw.qt.userms.models;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -31,7 +32,6 @@ public class Task {
     @Column(name="description", nullable=false)
     private String description;
 
-
     @Column(name="priority", nullable=false)
     private EPriority priority;
 
@@ -40,9 +40,11 @@ public class Task {
     private EStatus status = EStatus.ACTIVE;
 
     @Column(nullable = false)
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;
 
     @Column(nullable = false)
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
 
     @ManyToMany

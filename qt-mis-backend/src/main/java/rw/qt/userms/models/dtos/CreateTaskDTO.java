@@ -11,6 +11,7 @@ import rw.qt.userms.models.enums.EPriority;
 import rw.qt.userms.models.enums.EStatus;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -33,4 +34,8 @@ public class CreateTaskDTO {
 
     @NotNull
     private LocalDate endDate;
+
+    private List<UUID> projectsId;
+
+    private List<UUID> assigneesId;
 }

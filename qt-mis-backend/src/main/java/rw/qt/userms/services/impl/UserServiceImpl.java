@@ -28,10 +28,6 @@ import java.util.*;
 @Slf4j
 public class UserServiceImpl implements IUserService {
     private final IUserRepository userRepository;
-
-
-    private final ITaskService taskService;
-    private final IProjectService rankService;
     private final PasswordEncoder passwordEncoder;
 
 

@@ -13,7 +13,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import rw.qt.userms.models.Task;
 import rw.qt.userms.models.dtos.CreateTaskDTO;
+import rw.qt.userms.models.dtos.MultipleIdsDTO;
 import rw.qt.userms.models.dtos.UpdateTaskDTO;
+import rw.qt.userms.models.enums.EPriority;
 import rw.qt.userms.services.ITaskService;
 import rw.qt.userms.utils.Constants;
 import rw.qt.userms.exceptions.DuplicateRecordException;
@@ -37,13 +39,15 @@ public class TaskController extends BaseController {
 
 
 
+    @GetMapping
     public ResponseEntity<ApiResponse<Page<Task>>> searchAll(
             @RequestParam(value = "page", defaultValue = Constants.DEFAULT_PAGE_NUMBER) int page,
-           @NotNull @RequestParam(value = "q") String query,
+            @RequestParam(value = "q",required = false) String query,
             @RequestParam(value = "status", required = false) EStatus status,
+            @RequestParam(value = "priority", required = false) EPriority priority,
             @RequestParam(value = "limit", defaultValue = Constants.DEFAULT_PAGE_SIZE) int limit) throws ResourceNotFoundException {
         Pageable pageable = (Pageable) PageRequest.of(page-1, limit, Sort.Direction.DESC,"id");
-        Page<Task> tasks = this.taskService.searchAll(query, status, pageable);
+        Page<Task> tasks = this.taskService.searchAll(query, status,priority, pageable);
         return ResponseEntity.ok(
                 new ApiResponse<>(tasks, localize("responses.getListSuccess"), HttpStatus.OK)
         );
@@ -87,6 +91,30 @@ public class TaskController extends BaseController {
     public ResponseEntity<ApiResponse<Object>> delete(@PathVariable(value = "id") UUID id) throws ResourceNotFoundException {
         this.taskService.deleteById(id);
         return ResponseEntity.ok(new ApiResponse<>(null, localize("responses.deleteEntitySuccess"), null, HttpStatus.OK));
+    }
+
+    @PutMapping(path="/{id}/projects")
+    public ResponseEntity<ApiResponse<Task>> addProjects(@PathVariable(value = "id") UUID id, @Valid @RequestBody MultipleIdsDTO projectsId) throws ResourceNotFoundException, DuplicateRecordException {
+        Task task = this.taskService.addProjects(projectsId.getIds(), id);
+        return ResponseEntity.ok(new ApiResponse<>(task, localize("responses.updateEntitySuccess"), HttpStatus.OK));
+    }
+
+    @DeleteMapping(path="/{id}/projects")
+    public ResponseEntity<ApiResponse<Task>> removeProjects(@PathVariable(value = "id") UUID id, @Valid @RequestBody MultipleIdsDTO projectsId) throws ResourceNotFoundException {
+        Task task = this.taskService.removeProjects(projectsId.getIds(), id);
+        return ResponseEntity.ok(new ApiResponse<>(task, localize("responses.updateEntitySuccess"), HttpStatus.OK));
+    }
+
+    @PutMapping(path="/{id}/assignees")
+    public ResponseEntity<ApiResponse<Task>> addAssignees(@PathVariable(value = "id") UUID id, @Valid @RequestBody MultipleIdsDTO assigneesId) throws ResourceNotFoundException, DuplicateRecordException {
+        Task task = this.taskService.addAssignees(assigneesId.getIds(), id);
+        return ResponseEntity.ok(new ApiResponse<>(task, localize("responses.updateEntitySuccess"), HttpStatus.OK));
+    }
+
+    @DeleteMapping(path="/{id}/assignees")
+    public ResponseEntity<ApiResponse<Task>> removeAssignees(@PathVariable(value = "id") UUID id, @Valid @RequestBody MultipleIdsDTO assigneesId) throws ResourceNotFoundException {
+        Task task = this.taskService.removeAssignees(assigneesId.getIds(), id);
+        return ResponseEntity.ok(new ApiResponse<>(task, localize("responses.updateEntitySuccess"), HttpStatus.OK));
     }
 
 

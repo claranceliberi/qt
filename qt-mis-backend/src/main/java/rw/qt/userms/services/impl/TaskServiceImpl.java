@@ -8,11 +8,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import org.springframework.transaction.annotation.Transactional;
+import rw.qt.userms.exceptions.InternalServerErrorException;
 import rw.qt.userms.models.Task;
 
 import rw.qt.userms.models.dtos.CreateTaskDTO;
 import rw.qt.userms.models.dtos.UpdateTaskDTO;
 
+import rw.qt.userms.models.enums.EPriority;
+import rw.qt.userms.services.IProjectService;
 import rw.qt.userms.services.ITaskService;
 import rw.qt.userms.exceptions.BadRequestAlertException;
 import rw.qt.userms.exceptions.DuplicateRecordException;
@@ -20,20 +24,24 @@ import rw.qt.userms.exceptions.ResourceNotFoundException;
 
 import rw.qt.userms.models.enums.EStatus;
 import rw.qt.userms.repositories.ITaskRepository;
+import rw.qt.userms.services.IUserService;
 
 import java.util.*;
 
 @RequiredArgsConstructor
 @Slf4j
 @Service
+@Transactional
 public class TaskServiceImpl implements ITaskService {
 
     private final ITaskRepository taskRepository;
+    private final IProjectService projectService;
+    private final IUserService userService;
 
     @Override
-    public Page<Task> searchAll(String q, EStatus status, Pageable pageable) throws ResourceNotFoundException {
+    public Page<Task> searchAll(String q, EStatus status, EPriority priority, Pageable pageable) throws ResourceNotFoundException {
         log.info("Search all Tasks by query");
-       return this.taskRepository.searchAll(q,pageable);
+       return this.taskRepository.searchWithStatusAndPriority(q,status,priority,pageable);
     }
 
 
@@ -43,8 +51,95 @@ public class TaskServiceImpl implements ITaskService {
 
         var task  = new Task(dto);
         this.taskRepository.save(task);
+
+        if (dto.getProjectsId() != null) {
+            this.addProjects(dto.getProjectsId(), task.getId());
+        }
+
+        if (dto.getAssigneesId() != null) {
+            this.addAssignees(dto.getAssigneesId(), task.getId());
+        }
         return task;
 
+    }
+
+    @Override
+    public Task addProjects(List<UUID> projectsId, UUID taskID) throws ResourceNotFoundException, DuplicateRecordException {
+        log.info("Adding Projects to Task with id " + taskID);
+
+        var task = this.getById(taskID);
+
+        // check if the project exists and add them to task
+        for (UUID projectId : projectsId) {
+            var project = this.projectService.getById(projectId);
+
+            if(this.taskRepository.findByProjectsIdAndId(projectId, taskID).isPresent()){
+                throw new DuplicateRecordException("Task","project",project.getName());
+            }
+
+            task.getProjects().add(project);
+        }
+
+        return this.taskRepository.save(task);
+    }
+
+    @Override
+    public Task removeProjects(List<UUID> projectsId, UUID taskID) throws ResourceNotFoundException {
+        log.info("Removing Projects to Task with id " + taskID);
+
+        var task = this.getById(taskID);
+
+        // check if the project exists and remove them to task
+        for (UUID projectId : projectsId) {
+            var project = this.projectService.getById(projectId);
+
+            if(this.taskRepository.findByProjectsIdAndId(projectId, taskID).isPresent()){
+                task.getProjects().remove(project);
+            }
+
+        }
+
+        return this.taskRepository.save(task);
+    }
+
+    @Override
+    public Task addAssignees(List<UUID> assigneesId, UUID taskID) throws ResourceNotFoundException, DuplicateRecordException {
+        log.info("Adding Assignees to Task with id " + taskID);
+
+        var task = this.getById(taskID);
+
+        // check if the assignee exists and add them to task
+        for (UUID assigneeId : assigneesId) {
+            var assignee = this.userService.getById(assigneeId);
+
+            if(this.taskRepository.findByAssigneesIdAndId(assigneeId, taskID).isPresent()){
+                throw new DuplicateRecordException("Task ", "assigne", assignee.getFullName());
+            }
+
+            task.getAssignees().add(assignee);
+        }
+
+        return this.taskRepository.save(task);
+    }
+
+
+    @Override
+    public Task removeAssignees(List<UUID> assigneesId, UUID taskID) throws ResourceNotFoundException {
+        log.info("Removing Assignees to Task with id " + taskID);
+
+        var task = this.getById(taskID);
+
+        // check if the assignee exists and remove them to task
+        for (UUID assigneeId : assigneesId) {
+            var assignee = this.userService.getById(assigneeId);
+
+            if(this.taskRepository.findByAssigneesIdAndId(assigneeId, taskID).isPresent()){
+                task.getAssignees().remove(assignee);
+            }
+
+        }
+
+        return this.taskRepository.save(task);
     }
 
     @Override

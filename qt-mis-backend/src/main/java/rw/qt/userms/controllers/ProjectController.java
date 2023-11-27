@@ -34,22 +34,10 @@ public class ProjectController extends BaseController {
     private final IProjectService projectService;
 
 
-    @GetMapping(value = "/paginated")
-    public ResponseEntity<ApiResponse<Page<Project>>> getAllPaginated(
-            @RequestParam(value = "page", defaultValue = Constants.DEFAULT_PAGE_NUMBER) int page,
-            @RequestParam(value = "limit", defaultValue = Constants.DEFAULT_PAGE_SIZE) int limit)
-    {
-        Pageable pageable = (Pageable) PageRequest.of(page-1, limit, Sort.Direction.DESC,"id");
-        Page<Project> projects = this.projectService.getAllPaginated(pageable);
-        return ResponseEntity.ok(
-                new ApiResponse<>(projects, localize("responses.getListSuccess"), HttpStatus.OK)
-        );
-    }
-
     @GetMapping(value = "/search")
     public ResponseEntity<ApiResponse<Page<Project>>> searchAll(
             @RequestParam(value = "page", defaultValue = Constants.DEFAULT_PAGE_NUMBER) int page,
-           @NotNull @RequestParam(value = "q") String query,
+            @RequestParam(value = "q",required = false) String query,
             @RequestParam(value = "limit", defaultValue = Constants.DEFAULT_PAGE_SIZE) int limit)
     {
         Pageable pageable = (Pageable) PageRequest.of(page-1, limit, Sort.Direction.DESC,"id");

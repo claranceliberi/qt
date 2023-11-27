@@ -18,7 +18,7 @@ public interface IProjectRepository extends JpaRepository<Project, UUID> {
 
     Optional<Project> findByName(String name);
 
-    @Query("SELECT p FROM Project p WHERE (p.name ILIKE CONCAT('%', :query, '%') OR p.description ILIKE CONCAT('%', :query, '%'))" +
+    @Query("SELECT p FROM Project p WHERE (:query IS NULL OR :query = '' OR p.name ILIKE CONCAT('%', :query, '%') OR p.description ILIKE CONCAT('%', :query, '%'))" +
             " AND p.status <> 'DELETED'")
     Page<Project> searchAll(String query, Pageable pageable);
 }

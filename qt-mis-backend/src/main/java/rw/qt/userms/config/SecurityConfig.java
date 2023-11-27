@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -22,6 +23,9 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import rw.qt.userms.models.domains.ApiResponse;
 import rw.qt.userms.security.JwtAuthenticationEntryPoint;
 import rw.qt.userms.security.JwtAuthenticationFilter;
@@ -65,6 +69,18 @@ public class SecurityConfig {
 	};
 
 	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration configuration = new CorsConfiguration();
+		configuration.addAllowedOrigin("*");
+		configuration.addAllowedMethod("*");
+		configuration.addAllowedHeader("*");
+		configuration.setAllowCredentials(false);
+		UrlBasedCorsConfigurationSource source = new
+				UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration);
+		return source;
+	}
+	@Bean
 	public AuthenticationEntryPoint authenticationErrorHandler() {
 		return (request, response, ex) -> {
 			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -98,9 +114,10 @@ public class SecurityConfig {
 				.sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))
 				.authenticationProvider(authenticationProvider()).addFilterBefore(
 						jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class).exceptionHandling().authenticationEntryPoint(authenticationErrorHandler()).accessDeniedHandler(accessDeniedHandler()
-				);
+				)
+				;
 
-
+		http.cors(Customizer.withDefaults());
 		return http.build();
 	}
 
@@ -122,4 +139,6 @@ public class SecurityConfig {
 			throws Exception {
 		return config.getAuthenticationManager();
 	}
+
+
 }

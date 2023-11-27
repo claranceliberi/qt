@@ -14,8 +14,17 @@ import {
     DropdownMenuShortcut,
     DropdownMenuTrigger,
   } from "@/components/ui/dropdown-menu"
+import { useRouter } from "next/navigation"
   
+
+
   export function UserNav() {
+    const router = useRouter()
+    function logOut() {
+        localStorage.removeItem('qtToken')
+        router.push('/')
+    }
+
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -37,7 +46,7 @@ import {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={logOut}>
             Log out
             <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
           </DropdownMenuItem>

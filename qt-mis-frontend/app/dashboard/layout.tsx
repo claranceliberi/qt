@@ -1,12 +1,27 @@
 "use client"
 import { MainNav } from '@/components/main-nav'
+import { Button } from '@/components/ui/button'
 import { UserNav } from '@/components/user-nav'
+import { useRouter } from 'next/navigation'
 
 interface DashboardLayoutProps {
     children: React.ReactNode
   }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
+
+    const token = localStorage.getItem('qtToken')
+    const router = useRouter();
+
+    if(!token){
+        return <div className='grid w-full items-center'>
+            <div className='m-auto py-8 space-y-6'>
+                <div>Not Authenticated</div>
+                <Button onClick={() => router.push('/')}>Go To Sign In</Button>
+            </div>
+        </div>
+    }
+
     return (
        <>
       <div className="hidden flex-col md:flex">

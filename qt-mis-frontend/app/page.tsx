@@ -6,17 +6,52 @@ import { Icons } from "@/components/icons"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useRouter } from "next/navigation"
 
 export default function IndexPage() {
   const [isLoading, setIsLoading] = React.useState<boolean>(false)
+  const router = useRouter()
+  const [authInfo, setAuthInfo] = React.useState({
+    email: "",
+    password: "",
+  })
 
-  async function onSubmit(event: React.SyntheticEvent) {
+  function handleAuthInfoChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setAuthInfo((prev) => ({
+      ...prev,
+      [event.target.id]: event.target.value,
+    }))
+  }
+
+  async function onSubmit(event: React.SyntheticEvent) { 
     event.preventDefault()
     setIsLoading(true)
+    
 
-    setTimeout(() => {
-      setIsLoading(false)
-    }, 3000)
+    const response = await fetch("http://localhost:8080/api/v1/auth/signin", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "accept": "*/*",
+      },
+      body: JSON.stringify({
+        login: authInfo.email,
+        password: authInfo.password,
+      }),
+    })
+
+    const res = await response.json()
+
+    if(response.status === 500) {
+      alert(res.error)
+    }
+    if(response.status === 200){
+      localStorage.setItem('qtToken', res.token.accessToken)
+      router.push('/dashboard/users')
+
+    }
+    
+    setIsLoading(false)
   }
   return (
     <section className="container  gap-6 pb-8 pt-6 md:py-10">
@@ -35,6 +70,7 @@ export default function IndexPage() {
                 autoComplete="email"
                 autoCorrect="off"
                 disabled={isLoading}
+                onChange={handleAuthInfoChange}
               />
             </div>
             <div className="grid gap-1">
@@ -49,6 +85,7 @@ export default function IndexPage() {
                 autoComplete="password"
                 autoCorrect="off"
                 disabled={isLoading}
+                onChange={handleAuthInfoChange}
               />
             </div>
             <Button disabled={isLoading}>

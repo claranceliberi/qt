@@ -3,11 +3,14 @@ package rw.qt.userms.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +28,7 @@ import rw.qt.userms.models.enums.EStatus;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.UUID;
 
@@ -51,6 +55,24 @@ public class TaskController extends BaseController {
         return ResponseEntity.ok(
                 new ApiResponse<>(tasks, localize("responses.getListSuccess"), HttpStatus.OK)
         );
+    }
+
+    @GetMapping("/download")
+    public ResponseEntity<ByteArrayResource> download(
+            @RequestParam(value = "page", defaultValue = Constants.DEFAULT_PAGE_NUMBER) int page,
+            @RequestParam(value = "q",required = false) String query,
+            @RequestParam(value = "status", required = false) EStatus status,
+            @RequestParam(value = "priority", required = false) EPriority priority,
+            @RequestParam(value = "limit", defaultValue = Constants.DEFAULT_PAGE_SIZE) int limit) throws ResourceNotFoundException {
+        Pageable pageable = (Pageable) PageRequest.of(page-1, limit, Sort.Direction.DESC,"id");
+        ByteArrayResource stream = this.taskService.download(query, status,priority, pageable);
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.setContentType(new MediaType("application", "force-download"));
+        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=tasks.xlsx");
+
+        return new ResponseEntity<>(stream,
+                headers, HttpStatus.CREATED);
     }
 
     @GetMapping(path="/{id}")

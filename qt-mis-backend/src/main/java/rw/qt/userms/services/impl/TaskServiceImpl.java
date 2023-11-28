@@ -3,13 +3,17 @@ package rw.qt.userms.services.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
-import rw.qt.userms.exceptions.InternalServerErrorException;
 import rw.qt.userms.models.Task;
 
 import rw.qt.userms.models.dtos.CreateTaskDTO;
@@ -26,6 +30,8 @@ import rw.qt.userms.models.enums.EStatus;
 import rw.qt.userms.repositories.ITaskRepository;
 import rw.qt.userms.services.IUserService;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -42,6 +48,49 @@ public class TaskServiceImpl implements ITaskService {
     public Page<Task> searchAll(String q, EStatus status, EPriority priority, Pageable pageable) throws ResourceNotFoundException {
         log.info("Search all Tasks by query");
        return this.taskRepository.searchWithStatusAndPriority(q,status,priority,pageable);
+    }
+
+    private ByteArrayResource generateExcel(List<Task> tasks) {
+        try (
+                Workbook workbook = new XSSFWorkbook();
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ) {
+            Sheet sheet = workbook.createSheet("Entities");
+
+            // Creating header
+            Row headerRow = sheet.createRow(0);
+            headerRow.createCell(0).setCellValue("Task Name");
+            headerRow.createCell(1).setCellValue("Description");
+            headerRow.createCell(2).setCellValue("Status");
+            headerRow.createCell(3).setCellValue("Priority");
+            headerRow.createCell(4).setCellValue("Start Date");
+            headerRow.createCell(5).setCellValue("End Date");
+
+            // inserting data
+            int rowIdx = 1;
+            for (Task task : tasks) {
+                Row row = sheet.createRow(rowIdx++);
+                row.createCell(0).setCellValue(task.getName());
+                row.createCell(1).setCellValue(task.getDescription());
+                row.createCell(2).setCellValue(task.getStatus().toString());
+                row.createCell(3).setCellValue(task.getPriority().toString());
+                row.createCell(4).setCellValue(task.getStartDate().toString());
+                row.createCell(5).setCellValue(task.getEndDate().toString());
+            }
+
+            workbook.write(out);
+            workbook.close();
+            return new ByteArrayResource(out.toByteArray());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to generate Excel file", e);
+        }
+    }
+
+
+    @Override
+    public ByteArrayResource download(String q, EStatus status, EPriority priority, Pageable pageable) throws ResourceNotFoundException {
+      List<Task> tasksToDownload = searchAll(q,status,priority,pageable).getContent();
+        return generateExcel(tasksToDownload);
     }
 
 

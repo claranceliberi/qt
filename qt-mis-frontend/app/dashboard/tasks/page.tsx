@@ -10,8 +10,9 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { useToast } from "@/components/ui/use-toast"
 import { statuses, priorities } from "@/lib/data"
-import { useGetTasks, useUpdateTask } from "@/services/tasks"
+import { downloadTasksFile, useGetTasks, useUpdateTask } from "@/services/tasks"
 import { EPriority, EStatus, ITask } from "@/types/schema"
+import { DownloadIcon } from "@radix-ui/react-icons"
 import { ColumnDef } from "@tanstack/react-table"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
@@ -224,13 +225,24 @@ export default function Tasks(){
 
 
     const tasks = useMemo(() => tasksData.data?.data,[tasksData.data?.data])
+
+    async function handleDownload(){
+      await downloadTasksFile({page, limit,q,status,priority})
+    }
+
     return(
         <div>
 
             <div className="flex justify-between pb-6 pt-4">
                 <h1>Tasks</h1>
                 
+                <div className="flex space-x-4 items-center">
+                <Button onClick={handleDownload}>
+                      <span> <DownloadIcon /> </span>
+                      <span>Download</span>
+                    </Button>
                 <Button onClick={() => router.push('/dashboard/tasks/new')}>Create Task</Button>
+                </div>
   
             </div>
             

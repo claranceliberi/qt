@@ -1,5 +1,6 @@
 package rw.qt.userms.services;
 
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import rw.qt.userms.models.Task;
@@ -16,6 +17,7 @@ import java.util.UUID;
 
 public interface ITaskService {
     Page<Task> searchAll(String q, EStatus status, EPriority priority, Pageable pageable) throws ResourceNotFoundException;
+    ByteArrayResource download(String q, EStatus status, EPriority priority, Pageable pageable) throws ResourceNotFoundException;
     Task create(CreateTaskDTO dto) throws DuplicateRecordException, ResourceNotFoundException;
 
     Task addProjects(List<UUID> projectsId, UUID taskID) throws ResourceNotFoundException, DuplicateRecordException;

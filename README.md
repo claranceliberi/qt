@@ -11,3 +11,9 @@ This is a simple task management system that allows you to create, edit, and del
 ## ERD
 
 ![ERD](./ERD.jpg)
+
+## Documentation
+
+- [Backend](qt-mis-backend/README.md)
+- [Frontend](qt-mis-frontend/README.md)
+

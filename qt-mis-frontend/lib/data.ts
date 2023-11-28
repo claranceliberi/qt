@@ -6,6 +6,7 @@ import {
     CircleIcon,
     CrossCircledIcon,
   } from "@radix-ui/react-icons"
+import { DeleteIcon } from "lucide-react"
 
 export const statuses = [
     {
@@ -23,6 +24,29 @@ export const statuses = [
       label: "Canceled",
       icon: CrossCircledIcon,
     },
+  ]
+
+  export const userStatuses = [
+    {
+      value: "ACTIVE",
+      label: "Active",
+      icon: CheckCircledIcon,
+    },
+    {
+      value: "DELETED",
+      label: "Deleted",
+      icon: DeleteIcon,
+    },
+    {
+      value: "INACTIVE",
+      label: "Inactive",
+      icon: CrossCircledIcon,
+    },
+    {
+      value:'PENDING',
+      label:'Active',
+      icon: CheckCircledIcon,
+    }
   ]
 
   export const priorities = [

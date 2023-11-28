@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
 import rw.qt.userms.models.enums.EGender;
+import rw.qt.userms.models.enums.EUserStatus;
 
 import javax.validation.constraints.NotBlank;
 import java.util.UUID;
@@ -22,10 +23,6 @@ public class UpdateUserDTO {
     @NotBlank
     private String emailAddress;
 
-    @NotNull
-    @Length(min = 5)
-    private String serviceNumber;
-
     @NotBlank
     private String firstName;
 
@@ -38,6 +35,8 @@ public class UpdateUserDTO {
     @NotBlank
     private String phoneNumber;
 
-    private UUID centerId;
+    @NotNull
+    private EUserStatus status;
+
 
 }

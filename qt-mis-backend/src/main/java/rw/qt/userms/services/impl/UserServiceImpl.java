@@ -120,7 +120,7 @@ public class UserServiceImpl implements IUserService {
         userAccount.setFirstName(dto.getFirstName());
         userAccount.setLastName(dto.getLastName());
         userAccount.setGender(dto.getGender());
-
+        userAccount.setStatus(dto.getStatus());
         this.userRepository.save(userAccount);
 
        return userAccount;

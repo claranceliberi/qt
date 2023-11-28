@@ -1,27 +1,18 @@
 import { z } from 'zod';
 
 export const userSchema = z.object({
-  id: z.string(),
-  firstName: z.string(),
-  lastName: z.string(),
-  emailAddress: z.string(),
-  phoneNumber: z.string(),
+  id: z.string().optional(),
+  firstName: z.string().min(3, 'First name must be at least 3 characters'),
+  lastName: z.string().min(3, 'Last name must be at least 3 characters'),
+  emailAddress: z.string().email('Invalid email address'),
+  phoneNumber: z.string().min(10, 'Phone number must be at least 10 characters'),
   gender: z.string(),
   status: z.string(),
-  fullName: z.string(),
-  deletedFlag: z.boolean(),
-  credentialsExpiryDate: z.string(),
-  otpStatus: z.string(),
-  lastLogin: z.string(),
-  loginFailureCount: z.number(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
-  createdBy: z.string(),
-  modifiedBy: z.string(),
-  accountExpired: z.boolean(),
-  credentialsExpired: z.boolean(),
-  accountEnabled: z.boolean(),
-  accountLocked: z.boolean(),
+  fullName: z.string().optional(),
+  deletedFlag: z.boolean().optional(),
+  lastLogin: z.string().optional(),
+  createdAt: z.string().optional(),
+  password: z.string().min(4,"Password should be atleast 4 characters").optional(),
 });
 
 export const projectSchema = z.object({
@@ -108,6 +99,11 @@ export  enum EPriority {
     MEDIUM = "MEDIUM",
     HIGH = "HIGH",
   }
+
+
+export enum EUserStatus {
+  PENDING, ACTIVE, INACTIVE, DELETED,LOGIN_LOCKED,ADMIN_LOCKED
+}
 
 export type Optional<T> = {
   [P in keyof T]?: T[P];

@@ -31,11 +31,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { priorities } from "@/lib/data"
 import { useCreateTask } from "@/services/tasks"
 import { useToast } from "./ui/use-toast"
+import { useQueryClient } from "@tanstack/react-query"
 
 export function CreateTaskForm() {
 
     const createTask = useCreateTask();
     const {toast} = useToast()
+
+    const queryClient = useQueryClient()
 
     const userData = useGetUsers({page:1,limit:100})
     const projectData = useGetProjects({page:1,limit:100})
@@ -55,7 +58,6 @@ export function CreateTaskForm() {
   const form = useForm<z.infer<typeof taskSchema>>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
-        
         name: "",
         description: "",
         priority: 'NORMAL',
@@ -69,7 +71,6 @@ export function CreateTaskForm() {
     },
   })
 
-    // 2. Define a submit handler.
     function onSubmit(values: z.infer<typeof taskSchema>) {
 
         let synthetizedValues = {
@@ -83,6 +84,8 @@ export function CreateTaskForm() {
                 toast({
                     title:"Task created successfully"
                 })
+
+                queryClient.invalidateQueries({ queryKey: ['users'] })
             },
             onError: (err)=>{
                 toast({

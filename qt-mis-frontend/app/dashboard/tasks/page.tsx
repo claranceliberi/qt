@@ -230,17 +230,8 @@ export default function Tasks(){
             <div className="flex justify-between pb-6 pt-4">
                 <h1>Tasks</h1>
                 
-                <Dialog>
-                  <DialogTrigger><Button>Create Task</Button></DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Create a new Task</DialogTitle>
-                      <DialogDescription>
-                        <CreateTaskForm />
-                      </DialogDescription>
-                    </DialogHeader>
-                  </DialogContent>
-                </Dialog>
+                <Button onClick={() => router.push('/dashboard/tasks/new')}>Create Task</Button>
+  
             </div>
             
             {tasks && <DataTable pagination={tasks} columns={columns}

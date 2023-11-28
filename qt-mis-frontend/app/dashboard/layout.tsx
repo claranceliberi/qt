@@ -13,7 +13,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
     const token = localStorage.getItem('qtToken')
     const router = useRouter();
-
+    
     if(!token){
         return <div className='grid w-full items-center'>
             <div className='m-auto py-8 space-y-6'>

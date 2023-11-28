@@ -14,12 +14,14 @@ import {
     DropdownMenuShortcut,
     DropdownMenuTrigger,
   } from "@/components/ui/dropdown-menu"
+import { useAuthStore } from "@/store/auth"
 import { useRouter } from "next/navigation"
   
 
 
   export function UserNav() {
     const router = useRouter()
+    const auth = useAuthStore();
     function logOut() {
         localStorage.removeItem('qtToken')
         router.push('/')
@@ -38,9 +40,9 @@ import { useRouter } from "next/navigation"
         <DropdownMenuContent className="w-56" align="end" forceMount>
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">shadcn</p>
+              <p className="text-sm font-medium leading-none">{auth.user.fullName}</p>
               <p className="text-xs leading-none text-muted-foreground">
-                m@example.com
+                {auth.user?.emailAddress}
               </p>
             </div>
           </DropdownMenuLabel>

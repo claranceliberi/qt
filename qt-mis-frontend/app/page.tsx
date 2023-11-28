@@ -1,12 +1,14 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import React from "react"
+import React, { use } from "react"
 import { Icons } from "@/components/icons"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useRouter } from "next/navigation"
+import { useAuthStore } from "@/store/auth"
+import { IUser } from "@/types/schema"
 
 export default function IndexPage() {
   const [isLoading, setIsLoading] = React.useState<boolean>(false)
@@ -15,6 +17,8 @@ export default function IndexPage() {
     email: "",
     password: "",
   })
+
+  const authStore = useAuthStore();
 
   function handleAuthInfoChange(event: React.ChangeEvent<HTMLInputElement>) {
     setAuthInfo((prev) => ({
@@ -47,12 +51,19 @@ export default function IndexPage() {
     }
     if(response.status === 200){
       localStorage.setItem('qtToken', res.token.accessToken)
-      router.push('/dashboard/users')
+      setTimeout(async () => {
+        const user = await getCurrentUser()
+        authStore.setUser(user)
+        router.push('/dashboard/users')
+      },500)
 
     }
     
     setIsLoading(false)
   }
+
+
+
   return (
     <section className="container  gap-6 pb-8 pt-6 md:py-10">
       <div className='m-auto max-w-md'>
@@ -99,4 +110,20 @@ export default function IndexPage() {
       </div>
     </section>
   )
+}
+
+async function getCurrentUser(): IUser{
+  const token = localStorage.getItem('qtToken')
+  const response = await fetch("http://localhost:8080/api/v1/auth/currentUser", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "accept": "*/*",
+      "Authorization": `Bearer ${token}`
+    },
+  })
+
+  const res = await response.json()
+  console.log(res)
+  return res
 }

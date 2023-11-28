@@ -23,7 +23,7 @@ public interface ITaskRepository extends JpaRepository<Task, UUID> {
     @Query("""
             SELECT t FROM Task t
            WHERE (:query IS NULL OR :query = '' OR t.name ILIKE CONCAT('%', :query, '%') OR t.description ILIKE CONCAT('%', :query, '%'))
-           AND (:status IS NULL AND t.status <> 'DELETED' OR t.status = :status)
+           AND (:status IS NULL OR t.status = :status)
            AND (:priority IS NULL OR t.priority = :priority)
             """)
     Page<Task> searchWithStatusAndPriority(String query, EStatus status, EPriority priority, Pageable pageable);

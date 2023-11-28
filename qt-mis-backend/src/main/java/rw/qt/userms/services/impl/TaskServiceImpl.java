@@ -164,6 +164,10 @@ public class TaskServiceImpl implements ITaskService {
 
         task.setName(dto.getName());
         task.setDescription(dto.getDescription());
+        task.setStatus(dto.getStatus());
+        task.setPriority(dto.getPriority());
+        task.setStartDate(dto.getStartDate());
+        task.setEndDate(dto.getEndDate());
         task = this.taskRepository.save(task);
         return task;
     }

@@ -38,6 +38,7 @@ public class Project implements GrantedAuthority {
     @Column(name="status")
     private EStatus status = EStatus.ACTIVE;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "projects", fetch = FetchType.LAZY)
     private List<Task> tasks = new ArrayList<>();
 

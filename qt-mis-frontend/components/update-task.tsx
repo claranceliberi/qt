@@ -6,7 +6,7 @@ import { useGetUsers } from "@/services/users"
 import { useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { taskSchema } from "@/types/schema"
+import { ITask, taskSchema } from "@/types/schema"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { addDays, format } from "date-fns"
 
@@ -29,12 +29,16 @@ import { CalendarIcon } from "@radix-ui/react-icons"
 import { Textarea } from "./ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 import { priorities } from "@/lib/data"
-import { useCreateTask } from "@/services/tasks"
+import { useCreateTask, useGetTask, useUpdateTask } from "@/services/tasks"
 import { useToast } from "./ui/use-toast"
 
-export function CreateTaskForm() {
+interface UpdateTaskProps{
+    task:ITask
+}
 
-    const createTask = useCreateTask();
+export function UpdateTask({task}: UpdateTaskProps) {
+
+    const updateTask = useUpdateTask();
     const {toast} = useToast()
 
     const userData = useGetUsers({page:1,limit:100})
@@ -44,28 +48,40 @@ export function CreateTaskForm() {
         value:user.id,
         label:user.fullName
     })) ?? [], [userData.data])
+
+    const defaultUsers  = useMemo(() =>  task.assignees?.map(user => ({
+        value:user.id,
+        label:user.fullName
+    })), [task])
+
     const projects = useMemo(() => projectData?.data?.data.content.map(project => ({
         value:project.id,
         label:project.name
     })) ?? [], [projectData.data])
 
+    const defaultProjects = useMemo(() => task.projects?.map(project => ({
+        value:project.id,
+        label:project.name
+    })), [task])
+
     const now = new Date();
 
     
-  const form = useForm<z.infer<typeof taskSchema>>({
+    
+  const taskForm = useForm<z.infer<typeof taskSchema>>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
-        
-        name: "",
-        description: "",
-        priority: 'NORMAL',
-        status:'ACTIVE',
+        id: task?.id,
+        name: task?.name ,
+        description: task?.description ,
+        priority: task?.priority ,
+        status: task?.status,
         projectsId: [],
         assigneesId: [],
-        selectedAssigneesId:[],
-        selectedProjectId:[],
-        startDate: now,
-        endDate: addDays(now, 7),
+        selectedAssigneesId:defaultUsers,
+        selectedProjectId:defaultProjects,
+        startDate: new Date(task?.startDate ??  now),
+        endDate: new Date(task?.endDate ?? addDays(now, 7)) ,
     },
   })
 
@@ -78,10 +94,10 @@ export function CreateTaskForm() {
             assigneesId: values.selectedAssigneesId?.map(assignee => assignee.value),
         }
 
-        createTask.mutate(synthetizedValues,{
+        updateTask.mutate(synthetizedValues,{
             onSuccess: ()=>{
                 toast({
-                    title:"Task created successfully"
+                    title:"Task Updated successfully"
                 })
             },
             onError: (err)=>{
@@ -93,17 +109,16 @@ export function CreateTaskForm() {
       }
 
   return (
-   
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className=" space-y-8">
+        <Form {...taskForm}>
+            <form onSubmit={taskForm.handleSubmit(onSubmit)} className=" space-y-8">
                 <FormField
-                    control={form.control}
+                    control={taskForm.control}
                     name="name"
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Task Name</FormLabel>
                             <FormControl>
-                                <Input placeholder="Review project status..." {...field} />
+                                <Input placeholder="Review project status..." {...field} defaultValue={field.value} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -112,7 +127,7 @@ export function CreateTaskForm() {
 
                 <div className="grid grid-cols-2 gap-4">
                     <FormField
-                        control={form.control}
+                        control={taskForm.control}
                         name="selectedProjectId"
                         render={({ field: { ...field } }) => (
                             <FormItem className="mb-5">
@@ -128,7 +143,7 @@ export function CreateTaskForm() {
                         )}
                     />
                     <FormField
-                        control={form.control}
+                        control={taskForm.control}
                         name="selectedAssigneesId"
                         render={({ field: { ...field } }) => (
                             <FormItem className="mb-5">
@@ -144,7 +159,7 @@ export function CreateTaskForm() {
                 </div>
 
                     <FormField
-                        control={form.control}
+                        control={taskForm.control}
                         name="description"
                         render={({ field }) => (
                             <FormItem>
@@ -159,7 +174,7 @@ export function CreateTaskForm() {
                             <FormDescription>
                                 <div className="flex justify-between">
                                     <p>You can <span>@mention</span> other project and assignees.</p>
-                                    <p>{field.value.length}/200</p>
+                                    <p>{field.value?.length}/200</p>
                                 </div>
                             </FormDescription>
                             <FormMessage />
@@ -168,7 +183,7 @@ export function CreateTaskForm() {
                         />
    
    <FormField
-          control={form.control}
+          control={taskForm.control}
           name="priority"
           render={({ field }) => (
             <FormItem>
@@ -194,7 +209,7 @@ export function CreateTaskForm() {
         />
 
                     <FormField
-                        control={form.control}
+                        control={taskForm.control}
                         name="startDate"
                         render={({ field }) => (
                             <FormItem className="flex flex-col">
@@ -238,7 +253,7 @@ export function CreateTaskForm() {
                                 )}
                     />
                     <FormField
-                        control={form.control}
+                        control={taskForm.control}
                         name="endDate"
                         render={({ field }) => (
                             <FormItem className="flex flex-col">
@@ -281,7 +296,7 @@ export function CreateTaskForm() {
                                     </FormItem>
                                 )}
                     />
-              <Button type="submit">Submit</Button>
+              <Button type="submit">Update</Button>
 
             </form>
         </Form>

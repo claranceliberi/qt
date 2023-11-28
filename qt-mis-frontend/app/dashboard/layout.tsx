@@ -1,6 +1,7 @@
 "use client"
 import { MainNav } from '@/components/main-nav'
 import { Button } from '@/components/ui/button'
+import { Toaster } from '@/components/ui/toaster'
 import { UserNav } from '@/components/user-nav'
 import { useRouter } from 'next/navigation'
 
@@ -37,6 +38,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <div >{children}</div>
         </div>
       </div>
+      <Toaster />
+
     </>
         
     )

@@ -34,15 +34,17 @@ export const projectSchema = z.object({
 
 export const taskSchema = z.object({
   id: z.string().optional(),
-  name: z.string(),
-  description: z.string(),
+  name: z.string().min(5, 'Task name must be at least 5 characters'),
+  description: z.string().min(100, 'Task description must be at least 100 characters').max(200, 'Task description must be at most 200 characters'),
   status: z.string(),
   priority: z.string(),
-  startDate: z.string(),
-  endDate: z.string(),
+  startDate: z.date(),
+  endDate: z.date(),
   projectsId: z.array(z.string()).optional(),
+  selectedProjectId:z.array(z.object({value:z.string(),label:z.string()})).optional(),
   projects: z.array(projectSchema).optional(),
   assigneesId: z.array(z.string()).optional(),
+  selectedAssigneesId:z.array(z.object({value:z.string(),label:z.string()})).optional(),
   assignees: z.array(userSchema).optional(),
 });
 
@@ -53,6 +55,13 @@ export type ITask = z.infer<typeof taskSchema>;
 
 export  interface ApiResponse<T> {
     data: PageData<T>;
+    message: string;
+    status: string;
+    timestamp: string;
+  }
+
+export interface UnSortedApiResponse<T> {
+    data: T;
     message: string;
     status: string;
     timestamp: string;
